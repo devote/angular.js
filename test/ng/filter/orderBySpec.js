@@ -6,15 +6,37 @@ describe('Filter: orderBy', function() {
     orderBy = $filter('orderBy');
   }));
 
-  it('should return same array if predicate is falsy', function() {
-    var array = [1, 2, 3];
-    expect(orderBy(array)).toBe(array);
+  it('should return sorted array if predicate is not provided', function() {
+    expect(orderBy([2, 1, 3])).toEqual([1, 2, 3]);
+
+    expect(orderBy([2, 1, 3], '')).toEqual([1, 2, 3]);
+    expect(orderBy([2, 1, 3], [])).toEqual([1, 2, 3]);
+    expect(orderBy([2, 1, 3], [''])).toEqual([1, 2, 3]);
+
+    expect(orderBy([2, 1, 3], '+')).toEqual([1, 2, 3]);
+    expect(orderBy([2, 1, 3], ['+'])).toEqual([1, 2, 3]);
+
+    expect(orderBy([2, 1, 3], '-')).toEqual([3, 2, 1]);
+    expect(orderBy([2, 1, 3], ['-'])).toEqual([3, 2, 1]);
   });
 
   it('shouldSortArrayInReverse', function() {
     expect(orderBy([{a:15}, {a:2}], 'a', true)).toEqualData([{a:15}, {a:2}]);
     expect(orderBy([{a:15}, {a:2}], 'a', "T")).toEqualData([{a:15}, {a:2}]);
     expect(orderBy([{a:15}, {a:2}], 'a', "reverse")).toEqualData([{a:15}, {a:2}]);
+  });
+
+  it('should sort inherited from array', function() {
+    function BaseCollection() {}
+    BaseCollection.prototype = Array.prototype;
+    var child = new BaseCollection();
+    child.push({a:2});
+    child.push({a:15});
+
+    expect(Array.isArray(child)).toBe(false);
+    expect(child instanceof Array).toBe(true);
+
+    expect(orderBy(child, 'a', true)).toEqualData([{a:15}, {a:2}]);
   });
 
   it('should sort array by predicate', function() {

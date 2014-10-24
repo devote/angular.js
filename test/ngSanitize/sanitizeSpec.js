@@ -6,7 +6,7 @@ describe('HTML', function() {
 
   beforeEach(module('ngSanitize'));
   beforeEach(function() {
-    expectHTML = function(html){
+    expectHTML = function(html) {
       var sanitize;
       inject(function($sanitize) {
         sanitize = $sanitize;
@@ -23,7 +23,7 @@ describe('HTML', function() {
     beforeEach(function() {
       text = "";
       handler = {
-        start: function(tag, attrs, unary){
+        start: function(tag, attrs, unary) {
           start = {
             tag: tag,
             attrs: attrs,
@@ -35,7 +35,7 @@ describe('HTML', function() {
             attrs[key] = value.replace(/^\s*/, '').replace(/\s*$/, '');
           });
         },
-        chars: function(text_){
+        chars: function(text_) {
           text += text_;
         },
         end:function(tag) {
@@ -228,6 +228,35 @@ describe('HTML', function() {
     .toEqual('<p> 10 &lt; <span>100</span> </p>');
   });
 
+  it('should accept non-string arguments', function() {
+    expectHTML(null).toBe('');
+    expectHTML(undefined).toBe('');
+    expectHTML(42).toBe('42');
+    expectHTML({}).toBe('[object Object]');
+    expectHTML([1, 2, 3]).toBe('1,2,3');
+    expectHTML(true).toBe('true');
+    expectHTML(false).toBe('false');
+  });
+
+  it('should accept SVG tags', function() {
+      expectHTML('<svg width="400px" height="150px" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="40" stroke="black" stroke-width="3" fill="red"/></svg>')
+          .toEqual('<svg width="400px" height="150px" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="40" stroke="black" stroke-width="3" fill="red"/></svg>');
+  });
+
+  it('should sanitize SVG xmlns:xlink attribute values', function() {
+      expectHTML('<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><a xmlns:xhref="javascript:alert()"></a></svg>')
+          .toEqual('<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><a></a></svg>');
+
+      expectHTML('<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><a xmlns:xhref="https://example.com"></a></svg>')
+          .toEqual('<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><a></a></svg>');
+
+      expectHTML('<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><a xlink:href="javascript:alert()"></a></svg>')
+          .toEqual('<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><a></a></svg>');
+
+      expectHTML('<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><a xlink:href="https://example.com"></a></svg>')
+          .toEqual('<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><a xlink:href="https://example.com"></a></svg>');
+  });
+
   describe('htmlSanitizerWriter', function() {
     /* global htmlSanitizeWriter: false */
     if (angular.isUndefined(window.htmlSanitizeWriter)) return;
@@ -236,7 +265,7 @@ describe('HTML', function() {
     beforeEach(function() {
       html = '';
       uriValidator = jasmine.createSpy('uriValidator');
-      writer = htmlSanitizeWriter({push:function(text){html+=text;}}, uriValidator);
+      writer = htmlSanitizeWriter({push:function(text) {html+=text;}}, uriValidator);
     });
 
     it('should write basic HTML', function() {
@@ -463,7 +492,7 @@ describe('decodeEntities', function() {
     text = '';
     handler = {
       start: function() {},
-      chars: function(text_){
+      chars: function(text_) {
         text = text_;
       },
       end: function() {},

@@ -3,7 +3,7 @@
 describe('Filter: filter', function() {
   var filter;
 
-  beforeEach(inject(function($filter){
+  beforeEach(inject(function($filter) {
     filter = $filter('filter');
   }));
 
@@ -47,6 +47,16 @@ describe('Filter: filter', function() {
   it('should take function as predicate', function() {
     var items = [{name: 'a'}, {name: 'abc', done: true}];
     expect(filter(items, function(i) {return i.done;}).length).toBe(1);
+  });
+
+  it('should pass the index to a function predicate', function() {
+    var items = [0, 1, 2, 3];
+
+    var result = filter(items, function(value, index) {
+      return index % 2 === 0;
+    });
+
+    expect(result).toEqual([0, 2]);
   });
 
   it('should take object as predicate', function() {
@@ -150,7 +160,7 @@ describe('Filter: filter', function() {
         {key: 1, nonkey:14}
       ];
       var expr = {key: 10};
-      var comparator = function (obj,value) {
+      var comparator = function(obj, value) {
         return obj > value;
       };
       expect(filter(items, expr, comparator)).toEqual([items[2]]);

@@ -4,12 +4,14 @@ var files = require('./angularFiles').files;
 var util = require('./lib/grunt/utils.js');
 var versionInfo = require('./lib/versions/version-info');
 var path = require('path');
+var e2e = require('./test/e2e/tools');
 
 module.exports = function(grunt) {
   //grunt plugins
   require('load-grunt-tasks')(grunt);
 
   grunt.loadTasks('lib/grunt');
+  grunt.loadNpmTasks('angular-benchpress');
 
   var NG_VERSION = versionInfo.currentVersion;
   NG_VERSION.cdn = versionInfo.cdnVersion;
@@ -22,7 +24,12 @@ module.exports = function(grunt) {
   //config
   grunt.initConfig({
     NG_VERSION: NG_VERSION,
-
+    bp_build: {
+      options: {
+        buildPath: 'build/benchmarks',
+        benchmarksPath: 'benchmarks'
+      }
+    },
     parallel: {
       travis: {
         tasks: [
@@ -40,13 +47,14 @@ module.exports = function(grunt) {
           base: '.',
           keepalive: true,
           middleware: function(connect, options){
+            var base = Array.isArray(options.base) ? options.base[options.base.length - 1] : options.base;
             return [
-              //uncomment to enable CSP
-              // util.csp(),
+              util.conditionalCsp(),
               util.rewrite(),
+              e2e.middleware(),
               connect.favicon('images/favicon.ico'),
-              connect.static(options.base),
-              connect.directory(options.base)
+              connect.static(base),
+              connect.directory(base)
             ];
           }
         }
@@ -59,6 +67,7 @@ module.exports = function(grunt) {
           port: 8000,
           hostname: '0.0.0.0',
           middleware: function(connect, options){
+            var base = Array.isArray(options.base) ? options.base[options.base.length - 1] : options.base;
             return [
               function(req, resp, next) {
                 // cache get requests to speed up tests on travis
@@ -68,8 +77,10 @@ module.exports = function(grunt) {
 
                 next();
               },
+              util.conditionalCsp(),
+              e2e.middleware(),
               connect.favicon('images/favicon.ico'),
-              connect.static(options.base)
+              connect.static(base)
             ];
           }
         }
@@ -147,6 +158,9 @@ module.exports = function(grunt) {
       },
       ngTouch: {
         files: { src: 'src/ngTouch/**/*.js' },
+      },
+      ngAria: {
+        files: {src: 'src/ngAria/**/*.js'},
       }
     },
 
@@ -161,7 +175,7 @@ module.exports = function(grunt) {
       scenario: {
         dest: 'build/angular-scenario.js',
         src: [
-          'bower_components/jquery/jquery.js',
+          'bower_components/jquery/dist/jquery.js',
           util.wrap([files['angularSrc'], files['angularScenario']], 'ngScenario/angular')
         ],
         styles: {
@@ -214,6 +228,10 @@ module.exports = function(grunt) {
         dest: 'build/angular-cookies.js',
         src: util.wrap(files['angularModules']['ngCookies'], 'module')
       },
+      aria: {
+        dest: 'build/angular-aria.js',
+        src: util.wrap(files['angularModules']['ngAria'], 'module')
+      },
       "promises-aplus-adapter": {
         dest:'tmp/promises-aplus-adapter++.js',
         src:['src/ng/q.js','lib/promises-aplus/promises-aplus-test-adapter.js']
@@ -230,7 +248,8 @@ module.exports = function(grunt) {
       touch: 'build/angular-touch.js',
       resource: 'build/angular-resource.js',
       route: 'build/angular-route.js',
-      sanitize: 'build/angular-sanitize.js'
+      sanitize: 'build/angular-sanitize.js',
+      aria: 'build/angular-aria.js'
     },
 
 
@@ -273,14 +292,14 @@ module.exports = function(grunt) {
       }
     },
 
-    shell:{
-      "promises-aplus-tests":{
-        options:{
-          //stdout:true,
-          stderr:true,
-          failOnError:true
+    shell: {
+      "promises-aplus-tests": {
+        options: {
+          stdout: false,
+          stderr: true,
+          failOnError: true
         },
-        command:path.normalize('./node_modules/.bin/promises-aplus-tests tmp/promises-aplus-adapter++.js')
+        command: path.normalize('./node_modules/.bin/promises-aplus-tests tmp/promises-aplus-adapter++.js')
       }
     },
 

@@ -9,9 +9,9 @@ describe('Binder', function() {
   }
 
   beforeEach(function() {
-    this.compileToHtml = function (content) {
+    this.compileToHtml = function(content) {
       var html;
-      inject(function($rootScope, $compile){
+      inject(function($rootScope, $compile) {
         content = jqLite(content);
         $compile(content)($rootScope);
         html = sortedHtml(content);
@@ -168,7 +168,7 @@ describe('Binder', function() {
   }));
 
   it('IfAttrBindingThrowsErrorDecorateTheAttribute', function() {
-    module(function($exceptionHandlerProvider){
+    module(function($exceptionHandlerProvider) {
       $exceptionHandlerProvider.mode('log');
     });
     inject(function($rootScope, $exceptionHandler, $compile) {
@@ -344,7 +344,7 @@ describe('Binder', function() {
   }));
 
   it('ActionOnAHrefThrowsError', function() {
-    module(function($exceptionHandlerProvider){
+    module(function($exceptionHandlerProvider) {
       $exceptionHandlerProvider.mode('log');
     });
     inject(function($rootScope, $exceptionHandler, $compile) {
@@ -369,7 +369,7 @@ describe('Binder', function() {
     expect(element.text()).toBe('123{{a}}{{b}}{{c}}');
   }));
 
-  it('ShouldTemplateBindPreElements', inject(function ($rootScope, $compile) {
+  it('ShouldTemplateBindPreElements', inject(function($rootScope, $compile) {
     element = $compile('<pre>Hello {{name}}!</pre>')($rootScope);
     $rootScope.name = "World";
     $rootScope.$apply();
@@ -442,7 +442,7 @@ describe('Binder', function() {
   it('ItShouldFireChangeListenersBeforeUpdate', inject(function($rootScope, $compile) {
     element = $compile('<div ng-bind="name"></div>')($rootScope);
     $rootScope.name = '';
-    $rootScope.$watch('watched', function () {
+    $rootScope.$watch('watched', function() {
       $rootScope.name = 123;
     });
     $rootScope.watched = 'change';
