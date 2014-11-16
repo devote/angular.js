@@ -337,7 +337,7 @@ describe('browser', function() {
       it('should log warnings when 4kb per cookie storage limit is reached', function() {
         var i, longVal = '', cookieStr;
 
-        for (i=0; i<4083; i++) {
+        for (i = 0; i < 4083; i++) {
           longVal += 'x';
         }
 
@@ -349,8 +349,8 @@ describe('browser', function() {
 
         browser.cookies('x', longVal + 'xxxx'); //total size 4097-4099, a warning should be logged
         expect(logs.warn).toEqual(
-          [[ "Cookie 'x' possibly not set or overflowed because it was too large (4097 > 4096 " +
-             "bytes)!" ]]);
+          [["Cookie 'x' possibly not set or overflowed because it was too large (4097 > 4096 " +
+             "bytes)!"]]);
 
         //force browser to dropped a cookie and make sure that the cache is not out of sync
         browser.cookies('x', 'shortVal');
@@ -920,7 +920,7 @@ describe('browser', function() {
       });
     }
 
-    describe('update $location when it was changed outside of Angular in sync '+
+    describe('update $location when it was changed outside of Angular in sync ' +
        'before $digest was called', function() {
 
       it('should work with no history support, no html5Mode', function() {
